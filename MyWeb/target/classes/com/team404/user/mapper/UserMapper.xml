@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.team404.user.mapper.UserMapper">
+  
+  <select id="idConfirm" resultType="int">
+  	select count(*) as result from users where userId = #{userId}
+  </select>
+  
+  <insert id="join">
+  	insert into users (userId, userPw, userName, userPhone1, userPhone2, userEmail1, userEmail2, addrZipNum, addrBasic, addrDetail)
+  	values(#{userId}, #{userPw}, #{userName}, #{userPhone1}, #{userPhone2}, #{userEmail1}, #{userEmail2}, #{addrZipNum}, #{addrBasic}, #{addrDetail})
+  </insert>
+  
+  <select id="login" resultType="int">
+  	select count(*) as result from users where userId = #{userId} and userPw=#{userPw}
+  </select>
+  
+  <!-- 마이페이지 -->
+  <!-- id속성에는 사용할 이름이 들어감, type속성에는 vo의 경로 -->
+  <!-- result태그의 column은 DB의 컬럼명이 들어갑니다. -->
+  <!-- property속성에는 변수명이 들어가며, 대소문자까지 동일해야함. -->
+  <resultMap type="UserVO" id="userBoardList">
+  	<result property="userId" column="userid"/>
+  	<result property="userName" column="username"/>
+  	<result property="userPhone1" column="userphone1"/>
+  	<result property="userPhone2" column="userphone2"/>
+  	<result property="userEmail1" column="useremail1"/>
+  	<result property="userEmail2" column="useremail2"/>
+  	<result property="addrZipNum" column="addrzipnum"/>
+  	<result property="addrBasic" column="addrbasic"/>
+  	<result property="addrDetail" column="addrdetail"/>
+  	<collection property="userBoardList" resultMap="list"/>
+  </resultMap>
+  
+  <resultMap type="FreeBoardVO" id="list">
+  	<result property="bno" column="bno"/>
+  	<result property="title" column="title"/>
+  	<result property="regdate" column="regdate"/>
+  </resultMap>
+  
+  <!-- 조인의 결과로 하나의 데이터에 대하여 부가적인 데이터 처리를 하는경우 1:N관계를 처리할 수 있는 ResultMap태그를 이용함 -->
+  <select id="getInfo" resultMap="userBoardList">
+  	select userid,
+  		   username,
+  		   userphone1,
+  		   userphone2,
+  		   useremail1,
+  		   useremail2,
+  		   addrzipnum,
+  		   addrbasic,
+  		   addrdetail,
+  		   f.bno,
+  		   f.title,
+  		   f.regdate
+	from users u left outer join freeboard f
+	on u.userId = f.writer
+	where userid = #{userId}
+	order by bno desc
+  
+  </select>
+  
+  <update id="update">
+  	update users set 
+	  	userPw = #{userPw},
+	  	userName = #{userName},
+	  	userEmail1 = #{userEmail1},
+	  	userEmail2 = #{userEmail2},
+	  	userPhone1 = #{userPhone1},
+	  	userPhone2 = #{userPhone2},
+	  	addrZipNum = #{addrZipNum},
+	  	addrBasic = #{addrBasic},
+	  	addrDetail = #{addrDetail}
+  	where userId = #{userId}
+
+  </update>
+  
+  
+  
+  </mapper>
